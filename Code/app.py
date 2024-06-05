@@ -2,11 +2,15 @@ import base64
 import textwrap as tw
 from io import BytesIO
 
+import diet_planner
+import make_conditions
+import pandas as pd
 import streamlit as st
 
 # from care_note_enhancement import note_enhancer
 # from care_plan_generator import generate_plan
 from gemini_initializer import GeminiInitializer
+from KG_retrever import run_query
 
 # from graph_initializer import GraphInitializer
 # from knowledge_graph import add_patient, get_next_patient_id
@@ -16,6 +20,41 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from streamlit_option_menu import option_menu
 
+# Check if the session state variables are initialized
+if "bmi" not in st.session_state:
+    st.session_state.bmi = 2.5
+if "body_fat" not in st.session_state:
+    st.session_state.body_fat = 19.71
+if "glucose" not in st.session_state:
+    st.session_state.glucose = 245.0
+if "tc" not in st.session_state:
+    st.session_state.tc = 166.0
+if "bp_sys" not in st.session_state:
+    st.session_state.bp_sys = 113.0
+if "hba1c" not in st.session_state:
+    st.session_state.hba1c = 2.2
+if "tg" not in st.session_state:
+    st.session_state.tg = 175.0
+if "hdl" not in st.session_state:
+    st.session_state.hdl = 55.0
+if "ldl" not in st.session_state:
+    st.session_state.ldl = 97.0
+if "tc_hdl" not in st.session_state:
+    st.session_state.tc_hdl = 3.77
+if "bp_dias" not in st.session_state:
+    st.session_state.bp_dias = 66.0
+if "user_age" not in st.session_state:
+    st.session_state.user_age = 30
+if "user_weight" not in st.session_state:
+    st.session_state.user_weight = 70
+if "user_height" not in st.session_state:
+    st.session_state.user_height = 172
+if "food_preference" not in st.session_state:
+    st.session_state.food_preference = "Veg"
+if "food_type" not in st.session_state:
+    st.session_state.food_type = "North Indian"
+if "user_gender" not in st.session_state:
+    st.session_state.user_gender = "Male"
 
 def get_image_as_base64(url):
     with open(url, "rb") as image_file:
@@ -68,8 +107,8 @@ if "button_clicked" not in st.session_state:
 
 selected =option_menu(
     menu_title= None,
-    options=["Home","Diet-Planning"],
-    icons=["house","clipboard-heart-fill"],
+    options=["Home","General Info","Medical Info","Diet-Planning"],
+    icons=["house","clipboard-heart-fill","card-list","calendar-heart-fill"],
     menu_icon="cast",
     default_index=0,
     orientation="horizontal",
@@ -114,138 +153,89 @@ if selected == "Home":
     st.markdown(description, unsafe_allow_html=True)
     
 
-elif selected == "Diet-Planning":
-    st.title("Diet-Planning")
+elif selected == "General Info":
+    st.title("General Info")
 
     general_detail_container = st.container(border=True)
 
     with general_detail_container:
-        st.title("User General Details")
         col1, col2 = st.columns(2)
         
 
         with col1:
-            elder_id = st.text_input("User ID", value="D0001", help="Enter the numerical ID")
-            user_age = st.text_input("Age", value=None, help="Enter your age")
-            
-        
-        # uploaded_file = st.file_uploader("Choose a txt file", type=['txt'], accept_multiple_files=False)
-        
-        # if uploaded_file:
-        #     bytes_data = ""
-        #     bytes_data = uploaded_file.read()
+            st.session_state.elder_id = st.text_input("User ID", value="D0001", help="Enter the numerical ID")
+            st.session_state.user_age = st.number_input("Age", value=st.session_state.user_age, help="Enter your age")
+            st.session_state.food_preference  = st.selectbox("Food Preference", ("Veg", "Non-Veg"))
+            st.session_state.food_type = option = st.selectbox("Food Region", ("North Indian","South Indian"))
 
-        # col1, col2 = st.columns([4,1])
-        
+                    
         with col2:
-            user_gender = option = st.selectbox("Gender", ("Male", "Female"))
-            button = st.button("Submit", type = "primary", use_container_width=True)
+            st.session_state.user_gender = option = st.selectbox("Gender", ("Male", "Female"))
+            st.session_state.user_weight = st.number_input("Weight(Kg)", value=st.session_state.user_weight, help="Enter your Weight")
+            st.session_state.user_height = st.number_input("Height(cm)", value=st.session_state.user_height, help="Enter your Height")
 
-    # if button: 
-    #     if elder_id == "":
-    #         st.warning("Please enter the Elder ID")
-    #     elif not uploaded_file:
-    #         st.warning("Please upload a text file")
-    #     elif elder_id < default_elder_id:
-    #         st.error(f"Elder id already exists. Please use {default_elder_id} as elder id")
-    #     elif uploaded_file and elder_id != "":
-    #         data = str(bytes_data)
-    #         state = True #add_patient(st.session_state.my_gemini, st.session_state.my_graph, elder_id, care_note_mode=False, care_note="", data=data)
-    #         if state:
-    #             st.success("Elder added successfully")
-    #         if not state:
-    #             st.error("There was a error while adding the Elder.")
-    #         pass
+elif selected == "Medical Info":
+    st.title("Medical Info")
+
+    medical_detail_container = st.container(border=True)
+
+    with medical_detail_container:
+        col1, col2 = st.columns(2)
         
+        with col1:
+            st.session_state.bmi = st.number_input("BMI", value=st.session_state.bmi, help="Enter your BMI")
+            st.session_state.body_fat = st.number_input("Body fat", value=st.session_state.body_fat, help="Enter your Body fat")
+            st.session_state.glucose = st.number_input("Glucose", value=st.session_state.glucose, help="Enter your Glucose")
+            st.session_state.tc = st.number_input("Total Cholesterol (Tc)", value=st.session_state.tc, help="Enter your Total Cholesterol")
+            st.session_state.bp_sys = st.number_input("Systolic Blood Pressure", value=st.session_state.bp_sys, help="Enter your Systolic Blood Pressure")
+            st.session_state.hba1c = st.number_input("Diastolic Blood Pressure", value=st.session_state.hba1c, help="Enter your Diastolic Blood Pressure")
 
-# elif selected == "Care Note Enhancement":
-#     st.title("Care Note Enhancement")
+                    
+        with col2:
+            st.session_state.tg = st.number_input("Triglycerides", value=st.session_state.tg, help="Enter your Triglycerides")
+            st.session_state.hdl = st.number_input("High-Density Lipoprotein (HDL)", value=st.session_state.hdl, help="Enter your Weight")
+            st.session_state.ldl = st.number_input("Low-Density Lipoprotein ", value=st.session_state.ldl, help="Enter your Low-Density Lipoprotein ")
+            st.session_state.tc_hdl = st.number_input("Total Cholesterol/HDL Ratio (Tc/Hdl)", value=st.session_state.tc_hdl, help="Enter your Height")
+            st.session_state.bp_dias = st.number_input("Height", value=st.session_state.bp_dias, help="Enter your Height")
 
-#     with st.form(key='care_note_form'):
-#         col1, col2 = st.columns(2)
+elif selected == "Diet-Planning":
+    st.title("Diet-Planning")
 
-#         with col1:
-#             elder_id = st.text_input("Elder ID", value="", help="Enter the numerical ID")
-        
-#         with col2:
-#             date = st.date_input("Date")
-#             time = st.time_input("Time")
+    user_note = st.container(border=True)
+    generated_plan = st.container(border=True)
 
-#         # Care note text area outside the columns but still inside the form
-#         original_care_note = st.text_area("Enter the Care Note:", height=200)
+    with user_note:
+        button = st.button("Submit", type = "primary", use_container_width=True)
 
-#         # Form submit button
-#         col1, col2 = st.columns([4,1])
 
-#         with col2:
-#             st.session_state.button = st.form_submit_button("Submit", type = "primary", use_container_width=True)
-        
-#     if 'button_clicked' not in st.session_state:
-#         st.session_state.button_clicked = False
-#     if 'add_button_shown' not in st.session_state:
-#         st.session_state.add_button_shown = True
+    with generated_plan:
+        if button:
+            daily_need_calori, diet_recommendation, dieses = make_conditions.make_conditioner(st.session_state.user_gender, 
+                                                                                              st.session_state.user_age, 
+                                                                                              st.session_state.bmi, 
+                                                                                              st.session_state.glucose, 
+                                                                                              st.session_state.user_height, 
+                                                                                              st.session_state.user_weight, 
+                                                                                              st.session_state.tc, 
+                                                                                              st.session_state.tg, 
+                                                                                              st.session_state.hdl, 
+                                                                                              st.session_state.ldl, 
+                                                                                              st.session_state.tc_hdl, 
+                                                                                              st.session_state.hba1c)
+            kg_data = run_query(st.session_state.food_type, 
+                                st.session_state.food_preference, 
+                                dieses, 
+                                diet_recommendation, 
+                                daily_need_calori)
+            data = {
+                    "food_type": st.session_state.food_type,
+                    "food_preference": st.session_state.food_preference,
+                    "diseases": dieses,
+                    "diet_recommendation": diet_recommendation,
+                    "daily_need_calories": daily_need_calori
+                        }
+            print(kg_data)
+            response = diet_planner.gemini_bot(data,kg_data)
+            st.write(response)
+            
 
-#     # Your existing button and condition checks
-#     if st.session_state.button and not elder_id:
-#         st.warning("Please enter the Elder ID")
-#     elif st.session_state.button and not original_care_note:
-#         st.warning("Please enter the care note to enhance")
-#     elif st.session_state.button and elder_id and original_care_note:
-#         st.session_state.enhanced_note, st.session_state.suggestions_note  = note_enhancer(original_care_note, st.session_state.my_gemini)
-#         st.session_state.text_copy = f"""{st.session_state.enhanced_note}"""
-#         st.session_state.text_copy_suggestions = f"""{st.session_state.suggestions_note}"""
-#         st.session_state.button_clicked = True
-        
-#     if "text_copy" in st.session_state and st.session_state.text_copy:
-#         st.subheader("Generated Care Enhancement Note")
-#         editable_note = st.text_area(label="",value=st.session_state.text_copy, height=200)
-#         st.subheader("Generated Suggestions")
-#         st.code("\n".join(tw.wrap(st.session_state.text_copy_suggestions, width=80)), language="md")
-#         #st.code("\n".join(tw.wrap(st.session_state.text_copy, width=80)), language="md")
-
-#         col1, col2 = st.columns([4,1])
-#         if st.session_state.button_clicked:
-#             with col2:
-#                 add_button = st.button("Add Care Note", type = "primary", use_container_width=True)
-#             if add_button:
-#                 print("Adding the care note")
-#                 state = add_patient(st.session_state.my_gemini, st.session_state.my_graph, elder_id, care_note_mode=True, care_note=editable_note, data="")
-#                 if state:
-#                     st.success("Care Note added successfully")
-#                 else:
-#                     st.error("There was an error while adding the care note.")
-        
-# elif selected == "Care Plan Generation":
-#     st.title("Care Plan Generation")
-
-#     col1, col2 = st.columns(2)
-
-#     with col1:
-#         elder_id = st.text_input("Elder ID", value="", help="Enter the numerical ID")
-
-#     with col2:
-#         st.write("") 
-#         st.write("")  
-#         generation_button = st.button("Submit", type="primary")
-
-#     if generation_button and elder_id:
-#         care_plan = generate_plan(elder_id, GeminiInitializer=st.session_state.my_gemini, GraphInitializer=st.session_state.my_graph)
-#         st.session_state.care_plan = care_plan 
-#     elif not elder_id and generation_button:
-#         st.warning("Please fill in the elder ID to generate the care plan.")
-
-#     if 'care_plan' in st.session_state and st.session_state.care_plan:
-#         st.subheader("Generated Care Plan")
-#         st.markdown(st.session_state.care_plan)
-
-#         result_pdf = create_pdf("\n".join(tw.wrap(st.session_state.care_plan, width=80)))
-
-#         # Download button
-#         col1, col2 = st.columns([2,1])
-
-#         with col2:
-#             st.download_button(label="Download Care Plan as a PDF",
-#                             data=result_pdf,
-#                             file_name=f"care_plan_{elder_id}.pdf",
-#                             mime='application/pdf',
-#                             type="primary")
