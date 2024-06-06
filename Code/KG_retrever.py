@@ -9,28 +9,31 @@ driver = GraphDatabase.driver(uri, auth=(user, password))
 
 
 def run_query(region, diet, condition, type, value):
-    query = f"""
-    MATCH (det:Diet_Details)-[s1:who_has]->(con:Condition)-[s2:aims]->(g:Goal)-[s3:can_have]->(b)-[s4:servings_of]->(bs)-[s5:contains_calories_of]->(bcal)
-    WHERE det.Region = '{region}'
-      AND det.Diet = '{diet}'
-      AND con.Condition = '{condition}'
-      AND g.Type = '{type}'
-      AND det.Value = {value}
-      
-    RETURN
+    v_min = value-200
+    v_max = value+200
+    query_foods = f"""
+    MATCH (det)-[:who_has]->(con)-[:aims]->(g)-[:can_have]->(b)-[:and]->(ms)-[:and]->(l)-[:and]->(es)-[:and]->(dn)-[:and]->(pos)-[:and]->(pre)
+      WHERE det.Region = "{region}"
+      AND det.Diet = "{diet}"
+      AND g.Type = "{type}"
+      AND con.Condition = "{condition}"
+      AND {v_min} <= det.Value <= {v_max}
+    RETURN 
       det.Region AS Region,
-      det.Diet AS Diet,
-      det.Value AS Value,
-      con.Condition AS Condition,
-      g.Type AS GoalType,
+      det.Diet AS DietType,
+      g AS Goal, con AS Condition,
       b AS BreakfastItems,
-      bs AS BreakfastServings,
-      bcal AS BreakfastCalories
-    LIMIT 30
+      ms AS MorningSnackItems,
+      l AS LunchItems,
+      es AS EveningSnackItems,
+      dn AS DinnerItems,
+      pos AS PostWorkoutSnackItems,
+      pre AS PreWorkoutSnackItems
+    LIMIT 20
     """
-    print(query)
+    print(query_foods)
     with driver.session() as session:
-        result = session.run(query)
+        result = session.run(query_foods)
         return [record.data() for record in result]
 
 
