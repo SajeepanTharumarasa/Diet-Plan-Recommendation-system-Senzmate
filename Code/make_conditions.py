@@ -100,7 +100,7 @@ def weight_recommendation(bmi):
         return category
     elif bmi < 24.9:
         # maintain the same weight
-        category = None
+        category = "Weight Loss"
         return category
     elif bmi <29.9:
         category = "Weight Loss"
@@ -145,26 +145,26 @@ def evaluate_diabetes(glucose, hba1c, age, gender):
 def is_cholesterol_normal(tc, ldl, hdl, tg, tc_hdl_ratio, gender):
     # Total Cholesterol (Tc) Normal Range
     if not (tc < 200):
-        return "Abnormal"
+        return True
     
     # Low-Density Lipoprotein (LDL) Normal Range
     if not (ldl < 100):
-        return "Abnormal"
+        return True
     
     # High-Density Lipoprotein (HDL) Normal Range
     if gender == 'male':
         if not (hdl >= 40):
-            return "Abnormal"
+            return True
     elif gender == 'female':
         if not (hdl >= 50):
-            return "Abnormal"
+            return True
     
     # Triglycerides (Tg) Normal Range
     if not (tg < 150):
-        return "Abnormal"
+        return True
     
     # Total Cholesterol/HDL Ratio (Tc/Hdl) Normal Range
     if not (tc_hdl_ratio < 4):
-        return "Abnormal"
+        return True
     
-    return "Normal"
+    return False
