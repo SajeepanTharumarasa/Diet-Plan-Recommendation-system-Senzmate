@@ -203,14 +203,9 @@ elif selected == "Diet-Planning":
 
     user_note = st.container(border=True)
     generated_plan = st.container(border=True)
+    save_expert_suggestion = st.container(border=True)
 
-    with user_note:
-        button = st.button("Submit", type = "primary", use_container_width=True)
-
-
-    with generated_plan:
-        if button:
-            daily_need_calori, diet_recommendation, dieses = make_conditions.make_conditioner(st.session_state.user_gender, 
+    daily_need_calori, diet_recommendation, dieses = make_conditions.make_conditioner(st.session_state.user_gender, 
                                                                                               st.session_state.user_age, 
                                                                                               st.session_state.bmi, 
                                                                                               st.session_state.glucose, 
@@ -222,6 +217,25 @@ elif selected == "Diet-Planning":
                                                                                               st.session_state.ldl, 
                                                                                               st.session_state.tc_hdl, 
                                                                                               st.session_state.hba1c)
+
+    with user_note:
+        st.write(f"Summary of Your Health & Daily Needs{daily_need_calori} ")
+        st.write(f" - Age: {st.session_state.user_age}")
+        st.write(f" - Gender: {st.session_state.user_gender}")
+        st.write(f" - BMI: {st.session_state.bmi}")
+        st.write(f" - According to your BMI your diet goal is {diet_recommendation}")
+        st.write(f" - You have {dieses} dieses")
+        st.write(f" - Your Daily Calori need for your diet goal is {daily_need_calori}")
+
+        
+        
+        # button = st.button("Submit", type = "primary", use_container_width=True)
+
+
+    with generated_plan:
+        button = st.button("Generate Diet Plan", type = "primary", use_container_width=True)
+        if button:
+            
             kg_data = run_query(st.session_state.food_type, 
                                 st.session_state.food_preference, 
                                 dieses, 
@@ -237,5 +251,9 @@ elif selected == "Diet-Planning":
             print(kg_data)
             response = diet_planner.gemini_bot(data,kg_data)
             st.write(response)
+
+    with save_expert_suggestion:
+        expert_suggestion = st.text_input("Expert Suggestion", value="", help="Enter expert suggestion")
+        save_button = st.button("Save", type = "primary", use_container_width=True)
             
 
