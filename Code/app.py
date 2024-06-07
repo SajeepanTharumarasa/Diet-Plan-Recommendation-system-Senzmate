@@ -22,7 +22,7 @@ from streamlit_option_menu import option_menu
 
 # Check if the session state variables are initialized
 if "bmi" not in st.session_state:
-    st.session_state.bmi = 2.5
+    st.session_state.bmi = 29.5
 if "body_fat" not in st.session_state:
     st.session_state.body_fat = 19.71
 if "glucose" not in st.session_state:
