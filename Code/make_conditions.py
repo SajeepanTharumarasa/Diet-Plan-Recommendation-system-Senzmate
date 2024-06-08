@@ -1,7 +1,3 @@
-import csv
-
-import matplotlib.pyplot as plt
-
 
 def make_conditioner(gender, age, bmi, glucose, height_cm, weight_kg, tc, tg, hdl, ldl, tc_hdl, hba1c):
   
