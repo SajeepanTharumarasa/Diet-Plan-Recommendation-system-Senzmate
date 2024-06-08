@@ -1,4 +1,5 @@
 import base64
+import json
 import textwrap as tw
 from io import BytesIO
 
@@ -55,6 +56,8 @@ if "food_type" not in st.session_state:
     st.session_state.food_type = "North Indian"
 if "user_gender" not in st.session_state:
     st.session_state.user_gender = "Male"
+if 'expert_suggestion' not in st.session_state:
+    st.session_state.expert_suggestion = ""
 
 def get_image_as_base64(url):
     with open(url, "rb") as image_file:
@@ -224,8 +227,8 @@ elif selected == "Diet-Planning":
         st.write(f" - Gender: {st.session_state.user_gender}")
         st.write(f" - BMI: {st.session_state.bmi:.2f}")
         st.write(f" - According to your BMI your diet goal is {diet_recommendation}")
-        st.write(f" - You have {dieses} dieses")
-        st.write(f" - Your Daily Calori need for your diet goal is {daily_calories_needed:.2f} Cal")
+        st.write(f" - You have {dieses} disease")
+        st.write(f" - Your Daily calorie need for your diet goal is {daily_calories_needed:.2f} Cal")
 
         
         
@@ -250,10 +253,47 @@ elif selected == "Diet-Planning":
                         }
             print(kg_data)
             response = diet_planner.gemini_bot(data,kg_data)
-            st.write(response)
+            print(type(response))
+            cleaned_data = response.replace('```json', '').replace('```', '').strip()
+
+            print("Cleaned Data:", cleaned_data)
+
+            diet_plan = json.loads(cleaned_data)
+
+            # Create an empty list to store the data
+            data = []
+            meals_time = ["Day","Breakfast","Morning Snack", "Lunch","Evening Snack","Dinner","Pre-workout Snack","Post-workout Snack"]
+
+            # # Iterate over each day in the JSON data
+            # for day, meals in diet_plan.items():
+            #     meals_time.append(meals)
+            data.append(meals_time)
+            for day, meals in diet_plan.items():
+                row_data = [day]
+                for meal_time, meal_details in meals.items():
+                    # Extract item and serving quantity
+                    item = meal_details["Item"]
+                    serving_quantity = meal_details["Serving Quantity"]
+
+                    json_string = f"Item :{item} \n Serving Quantity :{serving_quantity}"
+                    row_data.append(json_string)
+                data.append(row_data)
+
+            # Create a DataFrame
+            print("meals_time :",meals_time)
+            print("data",data)
+            df = pd.DataFrame(data)
+
+            st.write(df)
+
+            print("Response :",cleaned_data)
 
     with save_expert_suggestion:
-        expert_suggestion = st.text_input("Expert Suggestion", value="", help="Enter expert suggestion")
+        expert_suggestion  = st.text_input("Expert Suggestion", value=st.session_state.expert_suggestion , help="Enter expert suggestion")
         save_button = st.button("Save", type = "primary", use_container_width=True)
+        if save_button:
+            st.session_state.expert_suggestion  = ""
+
+            
             
 
