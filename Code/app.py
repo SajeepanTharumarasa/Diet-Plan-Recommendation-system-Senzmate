@@ -124,7 +124,7 @@ if selected != st.session_state.active_tab:
 
 # Home tab
 if selected == "Home":
-    image_path = "backround.jpg" 
+    image_path = "/mount/src/diet-plan-recommendation-system-senzmate/Code/backround.jpg" 
     base64_image = get_image_as_base64(image_path)
     background_image_css = f"background-image: url('data:image/png;base64,{base64_image}');"
 
