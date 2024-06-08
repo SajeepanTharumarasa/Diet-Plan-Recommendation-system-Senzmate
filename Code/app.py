@@ -225,7 +225,7 @@ elif selected == "Diet-Planning":
         st.write(f" - BMI: {st.session_state.bmi:.2f}")
         st.write(f" - According to your BMI your diet goal is {diet_recommendation}")
         st.write(f" - You have {dieses} dieses")
-        st.write(f" - Your Daily Calori need for your diet goal is {daily_calories_needed} Cal")
+        st.write(f" - Your Daily Calori need for your diet goal is {daily_calories_needed:.2f} Cal")
 
         
         
