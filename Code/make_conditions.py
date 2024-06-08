@@ -39,7 +39,7 @@ def make_conditioner(gender, age, bmi, glucose, height_cm, weight_kg, tc, tg, hd
         daily_need_calori = 2400
     
     print("daily_calories_needed",daily_calories_needed)
-    return daily_need_calori, diet_recommendation, dieses
+    return daily_need_calori, diet_recommendation, dieses,daily_calories_needed
 
 
 def calculate_caloric_needs(weight, height, age, gender, activity_level, goal='Maintain', weight_change_per_week=0):

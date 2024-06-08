@@ -205,7 +205,7 @@ elif selected == "Diet-Planning":
     generated_plan = st.container(border=True)
     save_expert_suggestion = st.container(border=True)
 
-    daily_need_calori, diet_recommendation, dieses = make_conditions.make_conditioner(st.session_state.user_gender, 
+    daily_need_calori, diet_recommendation, dieses,daily_calories_needed = make_conditions.make_conditioner(st.session_state.user_gender, 
                                                                                               st.session_state.user_age, 
                                                                                               st.session_state.bmi, 
                                                                                               st.session_state.glucose, 
@@ -225,7 +225,7 @@ elif selected == "Diet-Planning":
         st.write(f" - BMI: {st.session_state.bmi:.2f}")
         st.write(f" - According to your BMI your diet goal is {diet_recommendation}")
         st.write(f" - You have {dieses} dieses")
-        st.write(f" - Your Daily Calori need for your diet goal is {daily_need_calori} Cal")
+        st.write(f" - Your Daily Calori need for your diet goal is {daily_calories_needed} Cal")
 
         
         
