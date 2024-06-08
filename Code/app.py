@@ -124,7 +124,7 @@ if selected != st.session_state.active_tab:
 
 # Home tab
 if selected == "Home":
-    image_path = "E:\\SenzMate\\Diet-Plan\\Code\\backround.jpg" 
+    image_path = "backround.jpg" 
     base64_image = get_image_as_base64(image_path)
     background_image_css = f"background-image: url('data:image/png;base64,{base64_image}');"
 
@@ -222,7 +222,7 @@ elif selected == "Diet-Planning":
         st.write("Summary of Your Health & Daily Needs")
         st.write(f" - Age: {st.session_state.user_age}")
         st.write(f" - Gender: {st.session_state.user_gender}")
-        st.write(f" - BMI: {st.session_state.bmi}")
+        st.write(f" - BMI: {st.session_state.bmi:.2f}")
         st.write(f" - According to your BMI your diet goal is {diet_recommendation}")
         st.write(f" - You have {dieses} dieses")
         st.write(f" - Your Daily Calori need for your diet goal is {daily_need_calori} Cal")
