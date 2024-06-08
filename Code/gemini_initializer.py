@@ -7,10 +7,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 class GeminiInitializer:
-    def __init__(self, config_path=".\config.json"):
-        with open(config_path) as f:
-            config = json.load(f)
-        self.api_key = config["gemini-api-key"]
+    def __init__(self, config_path="config.json"):
+        # with open(config_path) as f:
+        #     config = json.load(f)
+        self.api_key = "AIzaSyAZKyrdvM6i_RqNtw6snInBGxAhQJ_YxmY" #config["gemini-api-key"]
         os.environ['GOOGLE_API_KEY'] = self.api_key
         genai.configure(api_key = os.environ['GOOGLE_API_KEY'])
         print("Initializing the model")
