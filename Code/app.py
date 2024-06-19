@@ -11,7 +11,7 @@ import streamlit as st
 # from care_note_enhancement import note_enhancer
 # from care_plan_generator import generate_plan
 from gemini_initializer import GeminiInitializer
-from KG_retrever import run_query
+from KG_retrever import KG_data_retiver, run_query
 
 # from graph_initializer import GraphInitializer
 # from knowledge_graph import add_patient, get_next_patient_id
@@ -127,7 +127,7 @@ if selected != st.session_state.active_tab:
 
 # Home tab
 if selected == "Home":
-    image_path = "/mount/src/diet-plan-recommendation-system-senzmate/Code/backround.jpg" 
+    image_path = "backround.jpg" 
     base64_image = get_image_as_base64(image_path)
     background_image_css = f"background-image: url('data:image/png;base64,{base64_image}');"
 
@@ -168,7 +168,7 @@ elif selected == "General Info":
         with col1:
             st.session_state.elder_id = st.text_input("User ID", value="D0001", help="Enter the numerical ID")
             st.session_state.user_age = st.number_input("Age", value=st.session_state.user_age, help="Enter your age")
-            st.session_state.food_preference  = st.selectbox("Food Preference", ("Veg", "Non-Veg"))
+            st.session_state.food_preference  = st.selectbox("Food Preference", ("Veg", "Non Veg"))
             st.session_state.food_type = option = st.selectbox("Food Region", ("North Indian","South Indian"))
 
                     
@@ -238,31 +238,32 @@ elif selected == "Diet-Planning":
     with generated_plan:
         button = st.button("Generate Diet Plan", type = "primary", use_container_width=True)
         if button:
-            
-            kg_data = run_query(st.session_state.food_type, 
-                                st.session_state.food_preference, 
-                                dieses, 
-                                diet_recommendation, 
-                                daily_need_calori)
-            data = {
-                    "food_type": st.session_state.food_type,
-                    "food_preference": st.session_state.food_preference,
-                    "diseases": dieses,
-                    "diet_recommendation": diet_recommendation,
-                    "daily_need_calories": daily_need_calori
-                        }
-            print(kg_data)
-            response = diet_planner.gemini_bot(data,kg_data)
-            print(type(response))
-            cleaned_data = response.replace('```json', '').replace('```', '').strip()
+            kg_data = KG_data_retiver(st.session_state.food_type,st.session_state.food_preference,diet_recommendation,dieses)
 
-            print("Cleaned Data:", cleaned_data)
+            print("KL",st.session_state.food_preference,st.session_state.food_type,diet_recommendation,dieses)
+
+            # kg_data = run_query(st.session_state.food_type, 
+            #                     st.session_state.food_preference, 
+            #                     dieses, 
+            #                     diet_recommendation, 
+            #                     daily_need_calori)
+            # data = {
+            #         "food_type": st.session_state.food_type,
+            #         "Preferred_Cuisine": st.session_state.food_preference,
+            #         "diseases": dieses,
+            #         "health_goal": diet_recommendation,
+            #         "daily_need_calories": daily_need_calori
+            #             }
+
+            print("Kg data:",kg_data)
+            response = diet_planner.gemini_bot(daily_need_calori,kg_data)
+            cleaned_data = response.replace('```json', '').replace('```', '').strip()
 
             diet_plan = json.loads(cleaned_data)
 
             # Create an empty list to store the data
             data = []
-            meals_time = ["Day","Breakfast","Morning Snack", "Lunch","Evening Snack","Dinner","Pre-workout Snack","Post-workout Snack"]
+            meals_time = ["Day","Breakfast","Morning Snack", "Lunch","Dinner","Pre-workout Snack","Post-workout Snack"]
 
             # # Iterate over each day in the JSON data
             # for day, meals in diet_plan.items():
@@ -280,13 +281,10 @@ elif selected == "Diet-Planning":
                 data.append(row_data)
 
             # Create a DataFrame
-            print("meals_time :",meals_time)
-            print("data",data)
             df = pd.DataFrame(data)
 
             st.write(df)
 
-            print("Response :",cleaned_data)
 
     with save_expert_suggestion:
         expert_suggestion  = st.text_input("Expert Suggestion", value=st.session_state.expert_suggestion , help="Enter expert suggestion")
