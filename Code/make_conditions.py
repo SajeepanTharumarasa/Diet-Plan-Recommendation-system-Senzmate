@@ -13,7 +13,6 @@ def make_conditioner(gender, age, bmi, glucose, height_cm, weight_kg, tc, tg, hd
     else:
         dieses = None
 
-    # bmi = calculate_bmi(weight_kg, height_cm)
     diet_recommendation = weight_recommendation(bmi)
 
 
@@ -134,8 +133,6 @@ def evaluate_diabetes(glucose, hba1c, age, gender):
     else:
         diabetes_status = False #'Normal'
     
-   
-
     return diabetes_status
 
 def is_cholesterol_normal(tc, ldl, hdl, tg, tc_hdl_ratio, gender):

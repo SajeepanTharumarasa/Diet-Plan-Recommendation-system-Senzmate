@@ -95,17 +95,16 @@ RETURN DISTINCT pr.prs as Post_workout_snack_combo
 LIMIT 2
 """
 def KG_data_retiver(region,diet,d_type,condition):
+
   kg_data = []
   querys = [query_break,query_lunch,query_dinner,query_morn_snack,query_post_work,query_pre_work]
   for query in querys:
     food_query =  query.format(region=region,diet=diet,d_type=d_type,condition=condition)
+
     # Execute the query and collect the results
     with driver.session() as session:
         results = session.run(food_query)
         food_items = [record for record in results]
     kg_data.append(food_items)
-    # # Print the collected results
-    # for result in food_items:
-    #   print(result)
 
   return kg_data

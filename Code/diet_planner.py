@@ -1,5 +1,3 @@
-import json
-
 from gemini_initializer import GeminiInitializer
 
 base_prompt = """
@@ -137,7 +135,7 @@ def gemini_bot(user_calorie_needs, relevent_food_combo, gemini=GeminiInitializer
     food_item_data = load_jsonl_as_string(jsonl_file_path)
 
     prompt = base_prompt + template.format(user_calorie_needs=user_calorie_needs,relevent_food_combo=relevent_food_combo,food_item_data=food_item_data)
-    # print(prompt)
+
     response = gemini.run_text_model(prompt, model_name="gemini-1.5-pro-latest", temperature=0.2)
     print(response)
 

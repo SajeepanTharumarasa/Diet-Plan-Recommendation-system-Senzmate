@@ -1,4 +1,3 @@
-import json
 import os
 
 import google.generativeai as genai
@@ -8,11 +7,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 class GeminiInitializer:
     def __init__(self, config_path="config.json"):
-        # with open(config_path) as f:
-        #     config = json.load(f)
-        self.api_key = "AIzaSyAZKyrdvM6i_RqNtw6snInBGxAhQJ_YxmY" #config["gemini-api-key"]
+        self.api_key = "AIzaSyAZKyrdvM6i_RqNtw6snInBGxAhQJ_YxmY"
         os.environ['GOOGLE_API_KEY'] = self.api_key
         genai.configure(api_key = os.environ['GOOGLE_API_KEY'])
+
         print("Initializing the model")
 
     def run_text_model(self,
@@ -31,4 +29,4 @@ class GeminiInitializer:
             res = self.run_text_model(prompt=prompt, model_name = model_name, temperature = 0)
             return res
         except Exception as e:
-            print(e)
+            print("Exception : ",e)
