@@ -7,14 +7,8 @@ import diet_planner
 import make_conditions
 import pandas as pd
 import streamlit as st
-
-# from care_note_enhancement import note_enhancer
-# from care_plan_generator import generate_plan
 from gemini_initializer import GeminiInitializer
 from KG_retrever import KG_data_retiver, run_query
-
-# from graph_initializer import GraphInitializer
-# from knowledge_graph import add_patient, get_next_patient_id
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
@@ -231,9 +225,6 @@ elif selected == "Diet-Planning":
         st.write(f" - Your Daily calorie need for your diet goal is {daily_calories_needed:.2f} Cal")
 
         
-        
-        # button = st.button("Submit", type = "primary", use_container_width=True)
-
 
     with generated_plan:
         button = st.button("Generate Diet Plan", type = "primary", use_container_width=True)
@@ -241,21 +232,8 @@ elif selected == "Diet-Planning":
             kg_data = KG_data_retiver(st.session_state.food_type,st.session_state.food_preference,diet_recommendation,dieses)
 
             print("KL",st.session_state.food_preference,st.session_state.food_type,diet_recommendation,dieses)
-
-            # kg_data = run_query(st.session_state.food_type, 
-            #                     st.session_state.food_preference, 
-            #                     dieses, 
-            #                     diet_recommendation, 
-            #                     daily_need_calori)
-            # data = {
-            #         "food_type": st.session_state.food_type,
-            #         "Preferred_Cuisine": st.session_state.food_preference,
-            #         "diseases": dieses,
-            #         "health_goal": diet_recommendation,
-            #         "daily_need_calories": daily_need_calori
-            #             }
-
             print("Kg data:",kg_data)
+
             response = diet_planner.gemini_bot(daily_need_calori,kg_data)
             cleaned_data = response.replace('```json', '').replace('```', '').strip()
 
@@ -266,8 +244,6 @@ elif selected == "Diet-Planning":
             meals_time = ["Day","Breakfast","Morning Snack", "Lunch","Dinner","Pre-workout Snack","Post-workout Snack"]
 
             # # Iterate over each day in the JSON data
-            # for day, meals in diet_plan.items():
-            #     meals_time.append(meals)
             data.append(meals_time)
             for day, meals in diet_plan.items():
                 row_data = [day]
